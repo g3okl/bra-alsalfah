@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>برا السالفة - نسخة إبراهيم</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --accent: #ffae42; 
+            --accent-glow: rgba(255, 174, 66, 0.4);
+            --success: #00e676; 
+            --danger: #ff4b2b; 
+            --text: #ffffff; 
+        }
+        
+        /* تحسين شكل شريط التمرير (Scrollbar) من عندي */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background: var(--bg-gradient); 
+            color: var(--text); 
+            text-align: center; margin: 0; padding: 20px; 
+            min-height: 100vh; overflow-x: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .container { 
+            width: 100%; max-width: 480px; 
+            background: var(--card-bg); 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            padding: 30px; border-radius: 30px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .hidden { display: none !important; }
+        .section-fade { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(30px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        h1 { margin-top: 0; font-size: 2.4rem; text-shadow: 0 0 20px var(--accent-glow); color: var(--accent); font-weight: 900; }
+        
+        .section-title { text-align: right; color: var(--accent); font-weight: bold; margin: 25px 0 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; font-size: 1.2rem; }
+        
+        input, select { 
+            width: calc(100% - 30px); padding: 14px; border-radius: 15px; 
+            border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.4); 
+            color: white; font-family: 'Cairo', sans-serif; font-size: 1rem; 
+            margin-bottom: 12px; transition: 0.3s; outline: none; box-sizing: border-box;
+        }
+        input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); }
+        
+        button { 
+            font-family: 'Cairo', sans-serif; background: var(--accent); color: #000; 
+            border: none; padding: 14px 20px; border-radius: 15px; cursor: pointer; 
+            font-weight: bold; transition: all 0.3s ease; font-size: 1.1rem; width: 100%;
+            box-shadow: 0 8px 20px var(--accent-glow); margin-bottom: 10px;
+        }
+        button:hover { transform: translateY(-3px); filter: brightness(1.1); box-shadow: 0 10px 25px var(--accent-glow); }
+        
+        .btn-success { background: var(--success); box-shadow: 0 8px 20px rgba(0, 230, 118, 0.3); }
+        .btn-danger { background: var(--danger); color: white; box-shadow: 0 8px 20px rgba(255, 75, 43, 0.3); }
+        .btn-secondary { background: #5865F2; color: white; box-shadow: 0 8px 20px rgba(88, 101, 242, 0.3); }
+        
+        .flex-btns { display: flex; gap: 10px; align-items: center; }
+
+        .card { 
+            background: rgba(0,0,0,0.4); padding: 50px 20px; border-radius: 25px; 
+            border: 2px dashed var(--accent); margin: 30px 0; font-size: 2.2rem; 
+            font-weight: 900; cursor: pointer; transition: 0.4s;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .player-item, .word-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(255,255,255,0.1); padding: 15px; margin-bottom: 10px; 
+            border-radius: 15px; border-right: 5px solid var(--success); transition: 0.3s;
+        }
+        .word-item { border-right: 5px solid var(--accent); }
+        .score-badge { background: var(--accent); color: #000; padding: 5px 15px; border-radius: 20px; font-weight: 900; }
+        
+        .social-footer { margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
+        .social-icons { display: flex; justify-content: center; gap: 15px; }
+        .social-icons a { 
+            text-decoration: none; color: white; padding: 10px 20px; border-radius: 15px; 
+            font-size: 0.9rem; font-weight: bold; transition: 0.3s; display: flex; align-items: center; gap: 8px;
+        }
+        .instagram { background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); }
+        .discord { background: #5865F2; }
+
+        /* نافذة إدارة الكلمات */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+            z-index: 1000; display: flex; justify-content: center; align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎮 برا السالفة</h1>
+
+    <!-- 1️⃣ شاشة الإعدادات -->
+    <div id="setup" class="section-fade">
+        <div class="section-title">إعدادات اللعبة ⚙️</div>
+        
+        <select id="categorySelect" onchange="renderCustomWordsList()" style="width: 100%;">
+            <option value="gaming">🎮 ألعاب (Gaming)</option>
+            <option value="anime">⛩️ أنمي</option>
+            <option value="food">🍕 أكل وحلويات</option>
+            <option value="animals">🦁 حيوانات</option>
+            <option value="actors">🎭 مشاهير وممثلين</option>
+            <option value="series">📺 مسلسلات وأفلام</option>
+            <option value="sports">⚽ رياضة</option>
+            <option value="tech">📱 تكنولوجيا</option>
+            <option value="places">🌍 أماكن</option>
+            <option value="random">🎲 منوعات</option>
+        </select>
+
+        <div class="flex-btns">
+            <button onclick="toggleWordManager()" class="btn-secondary" style="width: 60px; margin: 0; font-size: 1.3rem;" title="إدارة الكلمات">⚙️</button>
+            <input type="text" id="newWordInput" placeholder="أضف كلمة جديدة للقسم..." style="margin:0; width: 100%;">
+            <button onclick="addCustomWord()" class="btn-success" style="width: 60px; margin: 0; font-size: 1.3rem;">➕</button>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 12px 20px; border-radius: 15px; margin: 15px 0;">
+            <label style="font-weight: bold; font-size: 1.1rem;">عدد الجواسيس 🕵️‍♂️:</label>
+            <select id="spyCountSelect" style="width: 80px; margin: 0;">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+        </div>
+
+        <div class="section-title">قائمة اللاعبين 👥</div>
+        <div class="flex-btns">
+            <input type="text" id="playerNameInput" placeholder="اكتب اسم اللاعب..." style="margin:0; width: 100%;">
+            <button onclick="addPlayer()" style="width: 100px; margin: 0;">إضافة</button>
+        </div>
+        
+        <div id="playerListUI" style="margin-top: 15px; max-height: 180px; overflow-y: auto; padding-right: 5px;"></div>
+        
+        <button onclick="clearPlayers()" class="btn-danger" style="margin-top: 10px; padding: 10px; font-size: 0.9rem;">تصفير نقاط ولاعبي الكل ❌</button>
+        
+        <button class="btn-success" style="font-size: 1.5rem; padding: 18px; margin-top: 20px; border-radius: 20px;" onclick="startGame()">🚀 ابدأ اللعب الآن</button>
+
+        <div class="social-footer">
+            <p style="margin-bottom: 10px;">تطوير وإعداد المبرمج: <b>إبراهيم</b> ✨</p>
+            <div class="social-icons">
+                <a href="https://www.instagram.com/fk0c_/" target="_blank" class="instagram">📸 Instagram</a>
+                <a href="https://discord.com/users/e.c9" target="_blank" class="discord">👾 Discord</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة إدارة الكلمات (Modal) -->
+    <div id="wordManagerModal" class="modal-overlay hidden">
+        <div class="container" style="max-height: 85vh; overflow-y: auto; background: #1a1a2e; border: 2px solid var(--accent);">
+            <h2 style="color:var(--accent);">كلماتك المضافة 📝</h2>
+            <p style="font-size: 0.9rem; margin-top: -10px;">(تظهر الكلمات حسب القسم الذي اخترته في الخارج)</p>
+            <div id="customWordsListUI" style="max-height: 350px; overflow-y: auto; padding-right: 5px;"></div>
+            <button onclick="toggleWordManager()" class="btn-danger" style="margin-top:20px; border-radius: 15px;">إغلاق النافذة ✖</button>
+        </div>
+    </div>
+
+    <!-- 2️⃣ شاشة تمرير الجهاز (رؤية السالفة) -->
+    <div id="game" class="hidden">
+        <h2 id="playerTurnName" style="color: var(--accent); font-size: 2rem; margin-bottom: 5px;"></h2>
+        <p style="margin-top: 0; color: #ccc;">استلم الجهاز واضغط على المربع</p>
+        <div class="card" id="mainCard" onclick="toggleCard()">اضغط لرؤية السالفة 👀</div>
+        <button onclick="nextPlayer()" class="btn-success" style="padding: 18px; font-size: 1.3rem; border-radius: 20px;">تأكيد وتمرير الجهاز ⬅️</button>
+    </div>
+
+    <!-- 3️⃣ شاشة النقاش -->
+    <div id="discussion" class="hidden">
+        <h2 style="color: var(--accent); font-size: 2.5rem; text-shadow: 0 0 15px var(--accent-glow);">🗣️ انطلقت السالفة!</h2>
+        <div style="background: rgba(0,0,0,0.4); padding: 25px; border-radius: 20px; margin: 30px 0; border: 1px solid var(--danger);">
+            <p id="spyCountInfo" style="font-size: 1.4rem; font-weight: bold; margin: 0; color: white;"></p>
+            <p style="font-size: 1rem; color: #aaa; margin-top: 10px;">تناقشوا بذكاء ولا تفضحوا السالفة!</p>
+        </div>
+        <button onclick="goToVoting()" class="btn-danger" style="padding: 18px; font-size: 1.3rem; border-radius: 20px;">انتهى النقاش - للتصويت ⏱️</button>
+    </div>
+
+    <!-- 4️⃣ شاشة التصويت -->
+    <div id="voting" class="hidden">
+        <h2 style="color: var(--danger); font-size: 2rem;">وقت التصويت! 🕵️‍♂️</h2>
+        <p>كل واحد يختار مين شاكك إنه الجاسوس</p>
+        <div id="votingUI" style="max-height: 350px; overflow-y: auto; padding-right: 5px; margin-bottom: 20px;"></div>
+        <button onclick="submitVotes()" class="btn-success" style="padding: 18px; font-size: 1.3rem; border-radius: 20px;">تأكيد الأصوات ✔️</button>
+    </div>
+
+    <!-- 5️⃣ شاشة تخمين الجاسوس -->
+    <div id="spyGuess" class="hidden">
+        <h2 style="color: var(--accent); font-size: 1.8rem;">فرصة الجاسوس للهروب! 🏃‍♂️</h2>
+        <h3 style="color: white; font-size: 2rem; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 15px;">دور: <span id="currentSpyName" style="color: var(--danger);"></span></h3>
+        <p>خمن السالفة صح عشان تسرق النقاط:</p>
+        <div id="spyOptionsUI" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
+    </div>
+
+    <!-- 6️⃣ شاشة النتائج والترتيب -->
+    <div id="roundResults" class="hidden">
+        <h2 id="roundTitle" style="font-size: 2.5rem; color: var(--accent);">النتائج 🏆</h2>
+        <div id="roundDetails" style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 20px; margin-bottom: 25px; font-size: 1.2rem; border: 1px solid var(--success);"></div>
+        <h3 style="text-align: right; color: var(--accent); margin-bottom: 10px;">الترتيب العام:</h3>
+        <div id="leaderboardUI" style="max-height: 200px; overflow-y: auto; padding-right: 5px;"></div>
+        <button onclick="resetGame()" class="btn-success" style="padding: 18px; font-size: 1.3rem; border-radius: 20px; margin-top: 25px;">بدء جولة جديدة 🔄</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
