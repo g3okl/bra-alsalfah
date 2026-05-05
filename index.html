@@ -119,6 +119,8 @@
         .vote-result-card { background: rgba(255,75,43,0.1); border: 1px solid var(--danger); border-radius: 20px; padding: 20px; margin-bottom: 20px; }
         
         .room-header { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 15px; margin-bottom: 20px; color: var(--success); font-weight: bold; border: 1px dashed var(--success); }
+        
+        .word-tag { display:inline-block; background:rgba(255,255,255,0.1); padding:5px 10px; border-radius:10px; margin:5px; font-size:0.9rem; }
     </style>
 </head>
 <body>
@@ -128,7 +130,7 @@
 <div class="container">
     <h1>🎮 برا السالفة</h1>
 
-    <!-- 0️⃣ شاشة الدخول والغرف (جديدة أونلاين) -->
+    <!-- 0️⃣ شاشة الدخول والغرف -->
     <div id="roomSelection" class="section-fade">
         <div class="section-title">الدخول للعبة 🌐</div>
         <input type="text" id="playerNameInputMain" placeholder="اكتب اسمك هنا..." required>
@@ -158,6 +160,16 @@
                 <option value="random">🎲 منوعات</option>
             </select>
 
+            <!-- قسم إضافة الكلمات (للهوست فقط) -->
+            <div id="wordManagementSection" style="margin-top: 15px; display: none; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; border: 1px dashed var(--accent);">
+                <div style="text-align: right; color: var(--accent); font-weight: bold; margin-bottom: 10px; font-size: 1rem;">إدارة الكلمات للقسم 📝</div>
+                <div class="flex-btns" style="margin-bottom: 10px;">
+                    <input type="text" id="newWordInput" placeholder="أضف كلمة جديدة..." style="margin:0; width: 70%;">
+                    <button onclick="addWord()" class="btn-success" style="margin:0; width: 30%; padding: 14px 10px; font-size: 1rem;">إضافة ➕</button>
+                </div>
+                <div id="categoryWordsList" style="max-height: 120px; overflow-y: auto; text-align: right;"></div>
+            </div>
+
             <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 12px 20px; border-radius: 15px; margin: 15px 0;">
                 <label style="font-weight: bold; font-size: 1.1rem;">عدد الجواسيس 🕵️‍♂️:</label>
                 <select id="spyCountSelect" style="width: 80px; margin: 0;">
@@ -182,7 +194,7 @@
         <div id="playerListUI" style="margin-top: 15px; max-height: 180px; overflow-y: auto; padding-right: 5px;"></div>
         
         <button id="startGameBtn" class="btn-success" style="font-size: 1.5rem; padding: 18px; margin-top: 20px; border-radius: 20px; display: none;" onclick="startGameOnline()">🚀 ابدأ اللعب الآن</button>
-        <p id="waitHostMsg" style="color: var(--accent); margin-top: 20px;">في انتظار الهوست لبدء اللعبة...</p>
+        <p id="waitHostMsg" style="color: var(--accent); margin-top: 20px;">في انتظار المسؤول (الهوست) لبدء اللعبة...</p>
 
         <div class="social-footer">
             <p style="margin-bottom: 10px;">تطوير وإعداد المبرمج: <b>إبراهيم</b> ✨</p>
@@ -214,7 +226,7 @@
             </div>
         </div>
         <button id="endDiscussionBtn" onclick="goToVotingOnline()" class="btn-danger" style="padding: 18px; font-size: 1.3rem; border-radius: 20px; display: none;">إنهاء النقاش - للتصويت ⏱️</button>
-        <p id="waitHostDiscussionMsg" style="color: var(--accent); margin-top: 20px;">في انتظار الهوست لإنهاء النقاش...</p>
+        <p id="waitHostDiscussionMsg" style="color: var(--accent); margin-top: 20px;">في انتظار المسؤول (الهوست) لإنهاء النقاش...</p>
     </div>
 
     <!-- 4️⃣ شاشة التصويت -->
@@ -241,11 +253,10 @@
         <h3 style="text-align: right; color: var(--accent); margin-bottom: 10px;">الترتيب العام للغرفة:</h3>
         <div id="leaderboardUI" style="max-height: 200px; overflow-y: auto; padding-right: 5px;"></div>
         <button id="newRoundBtn" onclick="resetGameOnline()" class="btn-success" style="padding: 18px; font-size: 1.3rem; border-radius: 20px; margin-top: 25px; display:none;">بدء جولة جديدة 🔄</button>
-        <p id="waitHostNewRoundMsg" style="color: var(--accent); margin-top: 20px;">الهوست يجهز الجولة القادمة...</p>
+        <p id="waitHostNewRoundMsg" style="color: var(--accent); margin-top: 20px;">المسؤول يجهز الجولة القادمة...</p>
     </div>
 </div>
 
-<!-- دمج سكريبت فايربيس + منطق اللعبة بالكامل -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
     import { getDatabase, ref, set, get, onValue, update, remove, push } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
@@ -265,7 +276,7 @@
     const db = getDatabase(app);
 
     // ==========================================
-    // قاعدة الكلمات الموسعة
+    // قاعدة الكلمات وإدارتها
     // ==========================================
     const wordsDB = {
         gaming: ["ماينكرافت", "فورتنايت", "روبلوكس", "فالورانت", "ببجي", "كول أوف ديوتي", "جراند", "فيفا", "روكيت ليق", "اوفرواتش", "ريد ديد", "كراش", "سوبر ماريو", "إلدن رينج", "تيكن", "مورتال كومبات", "امونج اس", "ديترويت"],
@@ -281,7 +292,38 @@
     };
 
     // ==========================================
-    // متغيرات الجلسة (Local State)
+    // دوال إدارة الكلمات للهوست
+    // ==========================================
+    window.updateCategoryWordsList = function() {
+        if(!isHost) return;
+        const cat = document.getElementById('categorySelect').value;
+        const words = wordsDB[cat];
+        const listUI = document.getElementById('categoryWordsList');
+        listUI.innerHTML = '';
+        words.forEach((w, index) => {
+            listUI.innerHTML += `<span class="word-tag">${w} <span style="color:var(--danger); cursor:pointer; margin-right:5px;" onclick="deleteWord('${cat}', ${index})">❌</span></span>`;
+        });
+    };
+
+    window.addWord = function() {
+        const cat = document.getElementById('categorySelect').value;
+        const input = document.getElementById('newWordInput');
+        const word = input.value.trim();
+        if(word) {
+            wordsDB[cat].push(word);
+            input.value = '';
+            updateCategoryWordsList();
+            showToast('تمت إضافة الكلمة بنجاح ✅');
+        }
+    };
+
+    window.deleteWord = function(cat, index) {
+        wordsDB[cat].splice(index, 1);
+        updateCategoryWordsList();
+    };
+
+    // ==========================================
+    // متغيرات الجلسة
     // ==========================================
     let myRoomId = null;
     let myPlayerId = null;
@@ -291,7 +333,6 @@
     let theWord = "";
     let selectedVote = null;
 
-    // توست للإشعارات
     function showToast(msg) {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -301,7 +342,6 @@
         setTimeout(() => toast.remove(), 3000);
     }
 
-    // التنقل بين الشاشات
     function showScreen(screenId) {
         ['roomSelection', 'setup', 'game', 'discussion', 'voting', 'spyGuess', 'roundResults'].forEach(id => {
             document.getElementById(id).classList.add('hidden');
@@ -317,7 +357,7 @@
         if(!name) return showToast('اكتب اسمك أولاً!');
         
         myPlayerName = name;
-        myRoomId = Math.floor(10000 + Math.random() * 90000).toString(); // كود 5 أرقام
+        myRoomId = Math.floor(10000 + Math.random() * 90000).toString(); 
         myPlayerId = "player_" + Math.random().toString(36).substr(2, 9);
         isHost = true;
 
@@ -329,10 +369,14 @@
         });
 
         document.getElementById('displayRoomCode').innerText = myRoomId;
-        document.getElementById('hostBadge').innerText = "(أنت الهوست 👑)";
+        document.getElementById('hostBadge').innerText = "(أنت المسؤول 👑)";
         document.getElementById('startGameBtn').style.display = 'block';
         document.getElementById('waitHostMsg').style.display = 'none';
         
+        // إظهار قسم الكلمات للهوست وتحديث القائمة
+        document.getElementById('wordManagementSection').style.display = 'block';
+        updateCategoryWordsList();
+
         listenToRoom();
         showScreen('setup');
     };
@@ -360,7 +404,10 @@
         document.getElementById('hostBadge').innerText = "(أنت لاعب 🎮)";
         document.getElementById('startGameBtn').style.display = 'none';
         document.getElementById('waitHostMsg').style.display = 'block';
+        
+        // تعطيل الإعدادات وإخفاء إدارة الكلمات عن اللاعبين
         document.getElementById('hostSettings').disabled = true;
+        document.getElementById('wordManagementSection').style.display = 'none';
 
         listenToRoom();
         showScreen('setup');
@@ -373,27 +420,34 @@
         const roomRef = ref(db, `rooms/${myRoomId}`);
         onValue(roomRef, (snapshot) => {
             const data = snapshot.val();
-            if(!data) return; // الغرفة انحذفت
+            if(!data) return;
 
             updatePlayersList(data.players);
 
-            // تحديث الإعدادات للاعبين العاديين
             if(!isHost && data.state === 'lobby') {
                 document.getElementById('categorySelect').value = data.settings.category;
                 document.getElementById('spyCountSelect').value = data.settings.spies;
                 document.getElementById('timerSelect').value = data.settings.timer;
             }
 
-            // التعامل مع تغيرات الحالات
             if(data.state === 'reveal') handleRevealState(data);
             if(data.state === 'discussion') handleDiscussionState(data);
             if(data.state === 'voting') handleVotingState(data);
-            if(data.state === 'spyGuess') handleSpyGuessState(data);
+            if(data.state === 'spyGuess') {
+                handleSpyGuessState(data);
+                // [تم حل المشكلة هنا]: الهوست يراقب اختيارات الجواسيس ويحسب النتيجة تلقائياً
+                if(isHost) {
+                    const spiesCount = parseInt(data.settings.spies);
+                    const guessesCount = data.spyGuesses ? Object.keys(data.spyGuesses).length : 0;
+                    if(guessesCount >= spiesCount) {
+                        calculateFinalResultsOnline();
+                    }
+                }
+            }
             if(data.state === 'results') handleResultsState(data);
             if(data.state === 'lobby') showScreen('setup');
         });
 
-        // الهوست يحدث الإعدادات لحظياً
         if(isHost) {
             ['categorySelect', 'spyCountSelect', 'timerSelect'].forEach(id => {
                 document.getElementById(id).addEventListener('change', () => {
@@ -402,6 +456,7 @@
                         spies: document.getElementById('spyCountSelect').value,
                         timer: document.getElementById('timerSelect').value
                     });
+                    if(id === 'categorySelect') updateCategoryWordsList();
                 });
             });
         }
@@ -424,7 +479,7 @@
     }
 
     // ==========================================
-    // 3. بدء اللعبة وتوزيع الأدوار (للهوست فقط)
+    // 3. بدء اللعبة وتوزيع الأدوار
     // ==========================================
     window.startGameOnline = async function() {
         if(!isHost) return;
@@ -435,34 +490,25 @@
 
         if(playerIds.length <= spyCount) return showToast('عدد اللاعبين يجب أن يكون أكثر من عدد الجواسيس!');
 
-        // سحب كلمة عشوائية
         const catWords = wordsDB[data.settings.category];
+        if(catWords.length === 0) return showToast('التصنيف فارغ! أضف كلمات أولاً.');
         const chosenWord = catWords[Math.floor(Math.random() * catWords.length)];
         
-        // اختيار الجواسيس
         let shuffled = playerIds.sort(() => 0.5 - Math.random());
         let spies = shuffled.slice(0, spyCount);
 
         let roles = {};
         playerIds.forEach(id => {
-            roles[id] = {
-                isSpy: spies.includes(id),
-                ready: false // لرؤية الكلمة
-            };
+            roles[id] = { isSpy: spies.includes(id), ready: false };
         });
 
-        // تحديث قاعدة البيانات للدخول في وضع الرؤية
         await update(ref(db, `rooms/${myRoomId}`), {
-            state: 'reveal',
-            secretWord: chosenWord,
-            roles: roles,
-            votes: {},
-            spyGuesses: {}
+            state: 'reveal', secretWord: chosenWord, roles: roles, votes: {}, spyGuesses: {}
         });
     };
 
     // ==========================================
-    // 4. مرحلة الرؤية (كل لاعب يشوف شاشته)
+    // 4. مرحلة الرؤية
     // ==========================================
     function handleRevealState(data) {
         showScreen('game');
@@ -493,14 +539,11 @@
         document.getElementById('waitingOthersRevealMsg').style.display = 'block';
         await update(ref(db, `rooms/${myRoomId}/roles/${myPlayerId}`), { ready: true });
 
-        // الهوست يشيك إذا الكل جاهز عشان ينقلهم للنقاش
         if(isHost) {
             const snap = await get(ref(db, `rooms/${myRoomId}/roles`));
             const roles = snap.val();
             const allReady = Object.values(roles).every(r => r.ready);
-            if(allReady) {
-                await update(ref(db, `rooms/${myRoomId}`), { state: 'discussion' });
-            }
+            if(allReady) await update(ref(db, `rooms/${myRoomId}`), { state: 'discussion' });
         }
     };
 
@@ -533,7 +576,7 @@
             if(timeLeft <= 0) {
                 clearInterval(timerInterval);
                 document.getElementById('timerDisplay').innerText = "00:00";
-                if(isHost) goToVotingOnline(); // نقل تلقائي
+                if(isHost) goToVotingOnline(); 
                 return;
             }
             timeLeft--;
@@ -563,7 +606,7 @@
         selectedVote = null;
 
         for(const id in data.players) {
-            if(id === myPlayerId) continue; // ما تقدر تصوت لنفسك
+            if(id === myPlayerId) continue;
             const p = data.players[id];
             ui.innerHTML += `
                 <div class="player-item" id="voteCard_${id}" onclick="selectVotePlayer('${id}')" style="cursor:pointer; border-right: 5px solid gray;">
@@ -593,14 +636,13 @@
             const playersCount = Object.keys(roomData.players).length;
 
             if(votesCount === playersCount) {
-                // الكل صوت، ننتقل لمرحلة تخمين الجاسوس
                 await update(ref(db, `rooms/${myRoomId}`), { state: 'spyGuess' });
             }
         }
     };
 
     // ==========================================
-    // 7. مرحلة تخمين الجاسوس للكلمة
+    // 7. مرحلة تخمين الجاسوس
     // ==========================================
     function handleSpyGuessState(data) {
         showScreen('spyGuess');
@@ -608,15 +650,22 @@
         ui.innerHTML = '';
 
         if(myRoleIsSpy) {
+            // التحقق إذا كان الجاسوس قد قام بالاختيار مسبقاً
+            if (data.spyGuesses && data.spyGuesses[myPlayerId]) {
+                document.getElementById('spyGuessMsg').innerText = "تم تسجيل اختيارك، ننتظر البقية...";
+                return;
+            }
+
             document.getElementById('spyGuessMsg').innerText = "اختر الكلمة التي تعتقد أنها السالفة:";
-            // خيارات الجاسوس (الكلمة الصح + 5 غلط)
             const catWords = wordsDB[data.settings.category];
             let options = [data.secretWord];
-            while(options.length < 6) {
+            
+            // جلب 5 كلمات عشوائية كتمويه (إذا كان التصنيف فيه كلمات كافية)
+            while(options.length < Math.min(6, catWords.length)) {
                 let w = catWords[Math.floor(Math.random() * catWords.length)];
                 if(!options.includes(w)) options.push(w);
             }
-            options.sort(() => 0.5 - Math.random()); // خلط
+            options.sort(() => 0.5 - Math.random());
             
             options.forEach(opt => {
                 ui.innerHTML += `<button onclick="submitSpyGuess('${opt}')" style="margin:0; padding:15px;">${opt}</button>`;
@@ -627,14 +676,13 @@
     }
 
     window.submitSpyGuess = async function(guessWord) {
+        document.getElementById('spyOptionsUI').innerHTML = ''; // إخفاء الأزرار بعد الضغط
+        showToast("تم إرسال تخمينك، انتظر لحظة... ⏳");
         await update(ref(db, `rooms/${myRoomId}/spyGuesses/${myPlayerId}`), { guess: guessWord });
-        
-        // الهوست يحسب النتائج
-        if(isHost) calculateFinalResultsOnline();
-        else if(myRoleIsSpy) showToast("تم تسجيل تخمينك، ننتظر الهوست...");
+        // لا نحتاج لشيء إضافي هنا، لأن الهوست سيحسب النتيجة تلقائياً في دالة listenToRoom
     };
 
-    async function calculateFinalResultsOnline() {
+    window.calculateFinalResultsOnline = async function() {
         const snap = await get(ref(db, `rooms/${myRoomId}`));
         const data = snap.val();
         
@@ -644,7 +692,6 @@
             voteCounts[target] = (voteCounts[target] || 0) + 1;
         }
 
-        // أكثر واحد انطرد
         let maxVotes = 0;
         let kickedId = null;
         for(let id in voteCounts) {
@@ -657,23 +704,20 @@
 
         resultsLog += `اللاعب المطرود: <b>${data.players[kickedId]?.name}</b> (${kickedWasSpy ? 'كان جاسوس ✅' : 'مواطن بريء ❌'})<br><br>`;
 
-        // تحديث النقاط (100 نقطة للفوز)
         for(const id in data.players) {
             let pScore = data.players[id].score;
             let isSpy = data.roles[id].isSpy;
 
             if(isSpy) {
-                // هل الجاسوس خمن الكلمة صح؟
                 let guessedRight = data.spyGuesses && data.spyGuesses[id] && data.spyGuesses[id].guess === data.secretWord;
                 if(guessedRight) {
                     pScore += 100;
                     resultsLog += `الجاسوس <b>${data.players[id].name}</b> خمن السالفة صح وسرق النقاط! 😱<br>`;
                 } else if (!kickedWasSpy) {
-                    pScore += 100; // الجاسوس عاش وما انطرد
+                    pScore += 100;
                     resultsLog += `الجاسوس <b>${data.players[id].name}</b> فاز وخدع الجميع! 🕵️‍♂️<br>`;
                 }
             } else {
-                // مواطن
                 if(kickedWasSpy) {
                     pScore += 100;
                     resultsLog += `المواطن <b>${data.players[id].name}</b> فاز لكشفه الجاسوس! 👮‍♂️<br>`;
@@ -685,7 +729,7 @@
         updates[`rooms/${myRoomId}/resultsLog`] = resultsLog;
         updates[`rooms/${myRoomId}/state`] = 'results';
         await update(ref(db), updates);
-    }
+    };
 
     // ==========================================
     // 8. شاشة النتائج
@@ -702,7 +746,6 @@
             document.getElementById('waitHostNewRoundMsg').style.display = 'block';
         }
 
-        // ترتيب اللاعبين
         let playersArr = [];
         for(let id in data.players) playersArr.push(data.players[id]);
         playersArr.sort((a,b) => b.score - a.score);
