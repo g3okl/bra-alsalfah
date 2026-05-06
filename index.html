@@ -120,7 +120,7 @@
         
         .room-header { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 15px; margin-bottom: 20px; color: var(--success); font-weight: bold; border: 1px dashed var(--success); }
         
-        .word-tag { display:inline-block; background:rgba(255,255,255,0.1); padding:5px 10px; border-radius:10px; margin:5px; font-size:0.9rem; }
+        .word-tag { display:inline-block; background:rgba(255,255,255,0.1); padding:5px 10px; border-radius:10px; margin:5px; font-size:0.9rem; border: 1px dashed var(--accent); }
     </style>
 </head>
 <body>
@@ -130,7 +130,6 @@
 <div class="container">
     <h1>🎮 برا السالفة</h1>
 
-    <!-- 0️⃣ شاشة الدخول والغرف -->
     <div id="roomSelection" class="section-fade">
         <div class="section-title">الدخول للعبة 🌐</div>
         <input type="text" id="playerNameInputMain" placeholder="اكتب اسمك هنا..." required>
@@ -141,7 +140,6 @@
         <button onclick="joinRoom()" class="btn-secondary" style="padding: 15px; font-size: 1.2rem;">انضمام للغرفة 🚪</button>
     </div>
 
-    <!-- 1️⃣ شاشة الإعدادات والانتظار (للهوست) -->
     <div id="setup" class="hidden">
         <div class="room-header">رقم الغرفة: <span id="displayRoomCode" style="font-size: 1.3rem; letter-spacing: 2px;">----</span></div>
         <div class="section-title">إعدادات اللعبة ⚙️ <span id="hostBadge" style="font-size: 0.8rem; color: #aaa;"></span></div>
@@ -160,9 +158,8 @@
                 <option value="random">🎲 منوعات</option>
             </select>
 
-            <!-- قسم إضافة الكلمات (للهوست فقط) -->
             <div id="wordManagementSection" style="margin-top: 15px; display: none; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; border: 1px dashed var(--accent);">
-                <div style="text-align: right; color: var(--accent); font-weight: bold; margin-bottom: 10px; font-size: 1rem;">إدارة الكلمات للقسم 📝</div>
+                <div style="text-align: right; color: var(--accent); font-weight: bold; margin-bottom: 10px; font-size: 1rem;">الكلمات المضافة يدوياً 📝</div>
                 <div class="flex-btns" style="margin-bottom: 10px;">
                     <input type="text" id="newWordInput" placeholder="أضف كلمة جديدة..." style="margin:0; width: 70%;">
                     <button onclick="addWord()" class="btn-success" style="margin:0; width: 30%; padding: 14px 10px; font-size: 1rem;">إضافة ➕</button>
@@ -205,7 +202,6 @@
         </div>
     </div>
 
-    <!-- 2️⃣ شاشة رؤية الكلمة (أونلاين: كل لاعب يرى كلمته) -->
     <div id="game" class="hidden">
         <h2 style="color: var(--accent); font-size: 2rem; margin-bottom: 5px;">مرحباً <span id="myPlayerNameDisplay"></span></h2>
         <p style="margin-top: 0; color: #ccc;">اضغط على المربع لتعرف هويتك</p>
@@ -214,7 +210,6 @@
         <p id="waitingOthersRevealMsg" style="color: var(--accent); margin-top: 15px; display: none;">في انتظار البقية لرؤية كلماتهم...</p>
     </div>
 
-    <!-- 3️⃣ شاشة النقاش مع التايمر -->
     <div id="discussion" class="hidden">
         <h2 style="color: var(--accent); font-size: 2.5rem; text-shadow: 0 0 15px var(--accent-glow);">🗣️ انطلقت السالفة!</h2>
         <div style="background: rgba(0,0,0,0.4); padding: 25px; border-radius: 20px; margin: 20px 0; border: 1px solid var(--danger);">
@@ -229,7 +224,6 @@
         <p id="waitHostDiscussionMsg" style="color: var(--accent); margin-top: 20px;">في انتظار المسؤول (الهوست) لإنهاء النقاش...</p>
     </div>
 
-    <!-- 4️⃣ شاشة التصويت -->
     <div id="voting" class="hidden">
         <h2 style="color: var(--danger); font-size: 2rem;">وقت التصويت! 🕵️‍♂️</h2>
         <p>صوت للشخص اللي تشك إنه برا السالفة</p>
@@ -238,7 +232,6 @@
         <p id="waitingVotesMsg" style="color: var(--accent); margin-top: 15px; display: none;">تم تسجيل صوتك، بانتظار البقية...</p>
     </div>
 
-    <!-- 5️⃣ شاشة تخمين الجاسوس -->
     <div id="spyGuess" class="hidden">
         <h2 style="color: var(--accent); font-size: 1.8rem;">فرصة الجاسوس للهروب! 🏃‍♂️</h2>
         <h3 style="color: white; font-size: 1.5rem; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 15px;">الجواسيس بيخمنوا السالفة الآن...</h3>
@@ -246,7 +239,6 @@
         <div id="spyOptionsUI" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
     </div>
 
-    <!-- 6️⃣ شاشة النتائج -->
     <div id="roundResults" class="hidden">
         <h2 style="font-size: 2.5rem; color: var(--accent);">النتائج 🏆</h2>
         <div id="roundDetails" style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 20px; margin-bottom: 25px; font-size: 1.2rem; border: 1px solid var(--success);"></div>
@@ -276,31 +268,44 @@
     const db = getDatabase(app);
 
     // ==========================================
-    // قاعدة الكلمات وإدارتها
+    // قاعدة الكلمات الأساسية (محمية ولا تظهر في قائمة الحذف) - أكثر من 40 كلمة لكل تصنيف
     // ==========================================
     const wordsDB = {
-        gaming: ["ماينكرافت", "فورتنايت", "روبلوكس", "فالورانت", "ببجي", "كول أوف ديوتي", "جراند", "فيفا", "روكيت ليق", "اوفرواتش", "ريد ديد", "كراش", "سوبر ماريو", "إلدن رينج", "تيكن", "مورتال كومبات", "امونج اس", "ديترويت"],
-        anime: ["ون بيس", "ناروتو", "هجوم العمالقة", "دراغون بول", "قاتل الشياطين", "بليتش", "ديث نوت", "جوجوتسو كايسن", "هنتر", "ون بانش مان", "طوكيو غول", "بوكو نو هيرو", "المحقق كونان", "كابتن ماجد"],
-        food: ["بيتزا", "شاورما", "برجر", "كبسة", "منسف", "سوشي", "باستا", "مقلوبة", "فلافل", "كباب", "ستيك", "شيبس", "اندومي", "آيس كريم", "شوكولاتة", "بان كيك", "دونات"],
-        animals: ["أسد", "نمر", "فيل", "زرافة", "تمساح", "قرد", "دب", "ثعلب", "ذئب", "حصان", "كلب", "قطة", "ببغاء", "نسر", "غزال", "حوت", "قرش", "أرنب"],
-        actors: ["توم كروز", "عادل إمام", "ويل سميث", "ليوناردو دي كابريو", "جوني ديب", "دوين جونسون", "توم هانكس", "أحمد حلمي", "محمد هنيدي", "روبرت داوني", "براد بيت"],
-        series: ["صراع العروش", "بريكنج باد", "سترينجر ثينقز", "فايكنجز", "طاش ما طاش", "شباب البومب", "مرايا", "ذا ووكينق ديد", "بيكي بلايندرز", "بريزون بريك", "لوست"],
-        sports: ["كرة قدم", "كرة سلة", "تنس", "سباحة", "طائرة", "مصارعة", "ملاكمة", "فورمولا 1", "جمباز", "جولف", "ماراثون", "فروسية"],
-        tech: ["آيفون", "بلايستيشن", "إكس بوكس", "لابتوب", "كمبيوتر", "ساعة ذكية", "ايباد", "نظارة واقع افتراضي", "طائرة درون", "سماعات", "كيبورد", "ماوس"],
-        places: ["مدرسة", "مستشفى", "مطار", "مطعم", "مول", "سينما", "حديقة", "مسجد", "بحر", "ملعب", "مقهى", "جامعة", "صيدلية", "بنك"],
-        random: ["قلم", "كتاب", "سيارة", "طيارة", "مفتاح", "نظارة", "ساعة", "تلفزيون", "مكيف", "ثلاجة", "كرسي", "سرير", "باب", "شباك"]
+        gaming: ["ماينكرافت", "فورتنايت", "روبلوكس", "فالورانت", "ببجي", "كول أوف ديوتي", "جراند", "فيفا", "روكيت ليق", "اوفرواتش", "ريد ديد", "كراش", "سوبر ماريو", "إلدن رينج", "تيكن", "مورتال كومبات", "امونج اس", "ديترويت", "زيلدا", "هالو", "تومب رايدر", "ريزدنت ايفل", "سايلنت هيل", "اساسنز كريد", "فار كراي", "ويتشر", "سايبربانك", "دارك سولز", "بلودبورن", "سيكيرو", "قاد اوف وار", "انشارتد", "هورايزن", "بيرسونا", "دراجون كويست", "فاينل فانتسي", "تيتريس", "باك مان", "سونيك", "هاف لايف", "بورتال", "ليق اوف ليجيندز", "دوتا"],
+        anime: ["ون بيس", "ناروتو", "هجوم العمالقة", "دراغون بول", "قاتل الشياطين", "بليتش", "ديث نوت", "جوجوتسو كايسن", "هنتر", "ون بانش مان", "طوكيو غول", "بوكو نو هيرو", "المحقق كونان", "كابتن ماجد", "دراغون كويست", "سيف النار", "سلام دانك", "دروبي مع دوريمي", "البؤساء", "عهد الأصدقاء", "ريمي", "سالي", "عدنان ولينا", "مازنجر", "جريندايزر", "خيميائي الفولاذ", "ستاينز جيت", "كود جياس", "فيت زيرو", "موب سايكو", "دكتور ستون", "بلاك كلوفر", "الخطايا السبع", "فيري تيل", "جينتاما", "ايفانجيليون", "سورد ارت اونلاين", "طوكيو ريفينجرز", "سباي فاميلي", "تشينسو مان"],
+        food: ["بيتزا", "شاورما", "برجر", "كبسة", "منسف", "سوشي", "باستا", "مقلوبة", "فلافل", "كباب", "ستيك", "شيبس", "اندومي", "آيس كريم", "شوكولاتة", "بان كيك", "دونات", "كشري", "محاشي", "ورق عنب", "تبولة", "فتوش", "حمص", "متبل", "بروستد", "شاورما عربي", "فاهيتا", "زنجر", "هوت دوج", "كريب", "وافل", "بقلاوة", "كنافة", "بسبوسة", "تشيز كيك", "تيراميسو", "سينابون", "مكرونة بشاميل", "طاجن", "سمك مشوي", "جمبري"],
+        animals: ["أسد", "نمر", "فيل", "زرافة", "تمساح", "قرد", "دب", "ثعلب", "ذئب", "حصان", "كلب", "قطة", "ببغاء", "نسر", "غزال", "حوت", "قرش", "أرنب", "فهد", "ضبع", "وحيد القرن", "فرس النهر", "جمل", "خروف", "ماعز", "بقرة", "ثور", "حمار", "غوريلا", "بطريق", "طاووس", "نعامة", "صقر", "بومة", "ضفدع", "سلحفاة", "ثعبان", "عقرب", "عنكبوت", "نحلة", "نملة", "فراشة"],
+        actors: ["توم كروز", "عادل إمام", "ويل سميث", "دي كابريو", "جوني ديب", "ذا روك", "توم هانكس", "أحمد حلمي", "محمد هنيدي", "روبرت داوني", "براد بيت", "كيانو ريفز", "كريستيان بيل", "هيو جاكمان", "كريس هيمسوورث", "سكارليت جوهانسون", "انجلينا جولي", "مورجان فريمان", "ال باتشينو", "روبرت دي نيرو", "جاكي شان", "بروس لي", "شاروخان", "سلمان خان", "اميتاب باتشان", "احمد مكي", "كريم عبد العزيز", "احمد عز", "ياسر القصبي", "ناصر القصبي", "عبد الحسين عبد الرضا", "طارق العلي", "حسن البلام", "سيلفستر ستالون", "ارنولد شوارزنيجر", "جيسون ستاثام", "فان ديزل", "بول ووكر", "توبي ماجواير", "توم هولاند"],
+        series: ["صراع العروش", "بريكنج باد", "سترينجر ثينقز", "فايكنجز", "طاش ما طاش", "شباب البومب", "مرايا", "ذا ووكينق ديد", "بيكي بلايندرز", "بريزون بريك", "لوست", "فريندز", "ذا اوفيس", "سوبرناتشورال", "دكستر", "شيرلوك", "بلاك ميرور", "بويز", "سكويد جيم", "لا كاسا دي بابيل", "دارك", "ذا كراون", "بابل", "الحفرة", "وادي الذئاب", "ارطغرل", "المؤسس عثمان", "باب الحارة", "ضيعة ضايعة", "الفصول الاربعة", "بقعة ضوء", "العاصوف", "سيلفي", "درب الزلق", "الحيالة", "افنجرز", "باتمان", "سبايدرمان", "سوبرمان", "ماتريكس", "هاري بوتر", "لورد اوف ذا رينجز"],
+        sports: ["كرة قدم", "كرة سلة", "تنس", "سباحة", "طائرة", "مصارعة", "ملاكمة", "فورمولا 1", "جمباز", "جولف", "ماراثون", "فروسية", "كاراتيه", "تايكوندو", "جودو", "رفع اثقال", "رماية", "تزلج", "ركوب امواج", "بولينج", "بلياردو", "شطرنج", "رغبي", "كريكيت", "بيسبول", "هوكي", "تنس طاولة", "اسكواش", "دراجات", "غوص", "تسلق", "رالي", "مصارعة ثيران", "كمال اجسام", "باركور", "يوجا", "بادل", "ريشة طائرة", "جمباز ايقاعي", "رمي الرمح"],
+        tech: ["آيفون", "بلايستيشن", "إكس بوكس", "لابتوب", "كمبيوتر", "ساعة ذكية", "ايباد", "نظارة واقع افتراضي", "طائرة درون", "سماعات", "كيبورد", "ماوس", "شاشة", "طابعة", "راوتر", "فلاش ميموري", "هارد ديسك", "مايكروفون", "كاميرا", "شاحن", "باور بانك", "كابل", "معالج", "كرت شاشة", "رام", "لوحة ام", "سيرفر", "روبوت", "ذكاء اصطناعي", "انترنت", "واي فاي", "بلوتوث", "فايف جي", "تطبيق", "متصفح", "نظام تشغيل", "ويندوز", "ماك", "لينكس", "اندرويد", "اي او اس"],
+        places: ["مدرسة", "مستشفى", "مطار", "مطعم", "مول", "سينما", "حديقة", "مسجد", "بحر", "ملعب", "مقهى", "جامعة", "صيدلية", "بنك", "فندق", "مكتبة", "متحف", "مسرح", "نادي رياضي", "مسبح", "شاطئ", "غابة", "جبل", "صحراء", "جزيرة", "قصر", "قلعة", "برج", "مصنع", "مزرعة", "بقالة", "مخبز", "صالون", "محطة وقود", "محطة قطار", "ميناء", "مخفر", "محكمة", "عيادة", "سفارة", "وزارة"],
+        random: ["قلم", "كتاب", "سيارة", "طيارة", "مفتاح", "نظارة", "ساعة", "تلفزيون", "مكيف", "ثلاجة", "كرسي", "سرير", "باب", "شباك", "طاولة", "كنب", "سجادة", "لوحة", "غسالة", "فرن", "مكنسة", "مكواة", "عطر", "مشط", "فرشاة", "صابون", "شامبو", "منشفة", "حذاء", "قميص", "بنطلون", "فستان", "حقيبة", "محفظة", "خاتم", "عقد", "سوار", "مظلة", "ولاعة", "مقص", "سكين", "ملعقة", "شوكة", "كوب", "صحن"]
     };
 
     // ==========================================
-    // دوال إدارة الكلمات للهوست
+    // قاعدة الكلمات المضافة يدوياً من قبل الهوست (هذي اللي تظهر وتنشطب)
+    // ==========================================
+    const customWordsDB = {
+        gaming: [], anime: [], food: [], animals: [], actors: [], series: [], sports: [], tech: [], places: [], random: []
+    };
+
+    // ==========================================
+    // دوال إدارة الكلمات للهوست (تعرض الكلمات المضافة يدوياً فقط)
     // ==========================================
     window.updateCategoryWordsList = function() {
         if(!isHost) return;
         const cat = document.getElementById('categorySelect').value;
-        const words = wordsDB[cat];
+        const customWords = customWordsDB[cat] || [];
         const listUI = document.getElementById('categoryWordsList');
         listUI.innerHTML = '';
-        words.forEach((w, index) => {
+        
+        if(customWords.length === 0) {
+            listUI.innerHTML = '<div style="color:#aaa; font-size:0.9rem; margin-top:10px;">لم تقم بإضافة كلمات خاصة لهذا القسم. (الكلمات الأساسية باللعبة مخفية ومحمية)</div>';
+            return;
+        }
+
+        customWords.forEach((w, index) => {
             listUI.innerHTML += `<span class="word-tag">${w} <span style="color:var(--danger); cursor:pointer; margin-right:5px;" onclick="deleteWord('${cat}', ${index})">❌</span></span>`;
         });
     };
@@ -310,7 +315,8 @@
         const input = document.getElementById('newWordInput');
         const word = input.value.trim();
         if(word) {
-            wordsDB[cat].push(word);
+            if(!customWordsDB[cat]) customWordsDB[cat] = [];
+            customWordsDB[cat].push(word);
             input.value = '';
             updateCategoryWordsList();
             showToast('تمت إضافة الكلمة بنجاح ✅');
@@ -318,8 +324,10 @@
     };
 
     window.deleteWord = function(cat, index) {
-        wordsDB[cat].splice(index, 1);
-        updateCategoryWordsList();
+        if(customWordsDB[cat]) {
+            customWordsDB[cat].splice(index, 1);
+            updateCategoryWordsList();
+        }
     };
 
     // ==========================================
@@ -373,7 +381,6 @@
         document.getElementById('startGameBtn').style.display = 'block';
         document.getElementById('waitHostMsg').style.display = 'none';
         
-        // إظهار قسم الكلمات للهوست وتحديث القائمة
         document.getElementById('wordManagementSection').style.display = 'block';
         updateCategoryWordsList();
 
@@ -405,7 +412,6 @@
         document.getElementById('startGameBtn').style.display = 'none';
         document.getElementById('waitHostMsg').style.display = 'block';
         
-        // تعطيل الإعدادات وإخفاء إدارة الكلمات عن اللاعبين
         document.getElementById('hostSettings').disabled = true;
         document.getElementById('wordManagementSection').style.display = 'none';
 
@@ -435,7 +441,6 @@
             if(data.state === 'voting') handleVotingState(data);
             if(data.state === 'spyGuess') {
                 handleSpyGuessState(data);
-                // [تم حل المشكلة هنا]: الهوست يراقب اختيارات الجواسيس ويحسب النتيجة تلقائياً
                 if(isHost) {
                     const spiesCount = parseInt(data.settings.spies);
                     const guessesCount = data.spyGuesses ? Object.keys(data.spyGuesses).length : 0;
@@ -490,8 +495,12 @@
 
         if(playerIds.length <= spyCount) return showToast('عدد اللاعبين يجب أن يكون أكثر من عدد الجواسيس!');
 
-        const catWords = wordsDB[data.settings.category];
-        if(catWords.length === 0) return showToast('التصنيف فارغ! أضف كلمات أولاً.');
+        const cat = data.settings.category;
+        // دمج الكلمات الأساسية مع كلمات الهوست المضافة
+        const customWords = customWordsDB[cat] || [];
+        const catWords = [...wordsDB[cat], ...customWords];
+
+        if(catWords.length === 0) return showToast('التصنيف فارغ!');
         const chosenWord = catWords[Math.floor(Math.random() * catWords.length)];
         
         let shuffled = playerIds.sort(() => 0.5 - Math.random());
@@ -650,7 +659,6 @@
         ui.innerHTML = '';
 
         if(myRoleIsSpy) {
-            // التحقق إذا كان الجاسوس قد قام بالاختيار مسبقاً
             if (data.spyGuesses && data.spyGuesses[myPlayerId]) {
                 document.getElementById('spyGuessMsg').innerText = "تم تسجيل اختيارك، ننتظر البقية...";
                 return;
@@ -658,9 +666,9 @@
 
             document.getElementById('spyGuessMsg').innerText = "اختر الكلمة التي تعتقد أنها السالفة:";
             const catWords = wordsDB[data.settings.category];
-            let options = [data.secretWord];
+            let options = [data.secretWord]; // الجواب الصحيح موجود دائماً هنا حتى لو كان كلمة ضافها الهوست
             
-            // جلب 5 كلمات عشوائية كتمويه (إذا كان التصنيف فيه كلمات كافية)
+            // نجيب 5 كلمات عشوائية كتمويه من الكلمات الأساسية
             while(options.length < Math.min(6, catWords.length)) {
                 let w = catWords[Math.floor(Math.random() * catWords.length)];
                 if(!options.includes(w)) options.push(w);
@@ -676,10 +684,9 @@
     }
 
     window.submitSpyGuess = async function(guessWord) {
-        document.getElementById('spyOptionsUI').innerHTML = ''; // إخفاء الأزرار بعد الضغط
+        document.getElementById('spyOptionsUI').innerHTML = ''; 
         showToast("تم إرسال تخمينك، انتظر لحظة... ⏳");
         await update(ref(db, `rooms/${myRoomId}/spyGuesses/${myPlayerId}`), { guess: guessWord });
-        // لا نحتاج لشيء إضافي هنا، لأن الهوست سيحسب النتيجة تلقائياً في دالة listenToRoom
     };
 
     window.calculateFinalResultsOnline = async function() {
